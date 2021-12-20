@@ -1,0 +1,48 @@
+      *
+      *	Copyright (c) 1995 Novell
+      * All rights reserved
+      *
+      *	THIS IS UNPUBLISHED PROPRIETARY
+      *	SOURCE CODE OF Novell, Inc.
+      *	The copyright notice above does not
+      *	evidence any actual or intended
+      *	publication of such source code.
+      *
+      * #ident	"@(#) cobol/cobatmi/TPEVTDEF.cbl	$Revision: 1.3 $"
+      * static	char	sccsid[] = "@(#) cobol/cobatmi/TPEVTDEF.cbl	$Revision: 1.3 $";
+      *
+      *  TPEVTDEF.cbl	
+      *
+	05 TPBLOCK-FLAG 	PIC S9(9) COMP-5.
+		88 TPBLOCK	 VALUE 0.
+		88 TPNOBLOCK	 VALUE 1.
+	05 TPTRAN-FLAG 	PIC S9(9) COMP-5.
+		88 TPTRAN	VALUE 0.
+		88 TPNOTRAN  	VALUE 1.  
+	05 TPREPLY-FLAG 	PIC S9(9) COMP-5.
+		88 TPREPLY	VALUE 0.
+		88 TPNOREPLY	VALUE 1.
+	05 TPTIME-FLAG 	PIC S9(9) COMP-5.
+		88 TPTIME	VALUE 0.
+		88 TPNOTIME	VALUE 1.
+	05 TPSIGRSTRT-FLAG 	PIC S9(9) COMP-5.
+		88 TPNOSIGRSTRT	VALUE 0.
+		88 TPSIGRSTRT	VALUE 1.
+	05 TPEV-METHOD-FLAG 	PIC S9(9) COMP-5.
+		88 TPEVNOTIFY 	VALUE 0.
+		88 TPEVSERVICE 	VALUE 1.
+		88 TPEVQUEUE 	VALUE 2.
+	05 TPEV-PERSIST-FLAG 	PIC S9(9) COMP-5.
+		88 TPEVNOPERSIST VALUE 0.
+		88 TPEVPERSIST	VALUE 1.
+	05 TPEV-TRAN-FLAG 	PIC S9(9) COMP-5.
+		88 TPEVNOTRAN	VALUE 0.
+		88 TPEVTRAN 	VALUE 1.
+      *
+	05 EVENT-COUNT		PIC S9(9) COMP-5.
+	05 SUBSCRIPTION-HANDLE 	PIC S9(9) COMP-5.
+	05 NAME-1		PIC X(31).
+	05 NAME-2		PIC X(31).
+	05 EVENT-NAME		PIC X(31).
+	05 EVENT-EXPR		PIC X(255).
+	05 EVENT-FILTER		PIC X(255).

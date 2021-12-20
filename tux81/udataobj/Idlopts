@@ -1,0 +1,4 @@
+# Name ; TIDL_options ; IDL_options ; C_comp_options ; DCE_libraries 
+# Digital DCE for Windows NT 1.00 (intel)
+DEC_DCE;-no_mepv;-call_std cdecl -v -no_mepv;-DWIN32 -D_X86_=1 -DM_I86 -W3 -nologo -I. -I%TUXDIR%\INCLUDE -I%DCEINC%;%DCELIB%\libdce.lib %DCELIB%\pthreads.lib
+#ident	"@(#)IDLOPTS	1.3"

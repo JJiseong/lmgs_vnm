@@ -1,0 +1,63 @@
+$/*	Copyright (c) 1995 Novell
+$	All rights reserved
+$
+$	THIS IS UNPUBLISHED PROPRIETARY
+$	SOURCE CODE OF NOVELL
+$	The copyright notice above does not
+$	evidence any actual or intended
+$	publication of such source code.
+$
+$#ident	"@(#) tuxedo/include/evt_mib	$Revision: 1.3 $"
+$*/
+$/*
+$	Warning: This file should not be changed in any
+$	way, doing so will destroy the compatibility with TUXEDO programs
+$	and libraries.
+$*/
+$#ifndef _EVT_MIB_H
+$#define _EVT_MIB_H
+$#ifndef NOWHAT
+$static	char h_evt_mib[] = "@(#) tuxedo/include/evt_mib	$Revision: 1.3 $";
+$#endif
+$
+$#include <fml32.h>
+$#include <tpadm.h>
+$
+#NAME		    ID	TYPE	COMMENT
+#----		    --	----	-------
+*base 7000
+$#ifndef REDUCE_CPP
+$/*
+$	The field numbers below should always begin at 0 and increase.
+$	Field numbers cannot be reused or changed from release to release or
+$	interoperability will be broken.
+$*/
+TA_EVENT_NAME			0	string
+TA_EVENT_SEVERITY		1	string
+TA_EVENT_LMID			2	string
+TA_EVENT_TIME			3	long
+TA_EVENT_USEC			4	long
+TA_EVENT_DESCRIPTION		5	string
+TA_ERROR_STRING			6	string
+# the following field is now in the tpadm file so that _tpsubscribe users can 
+# use it for selecting a subscription
+#TA_SUBSCRIPTION_HANDLE		7	long 
+TA_EB_PID			8	long
+TA_EB_MID			9	long
+TA_EB_API_CALL			10	string
+TA_EB_SUBSCRIBER_TYPE		11	long
+$
+$/*Fields used for synchronization of subscription database*/
+TA_EB_LAST_SEQNO		12	long
+TA_EB_LAST_POLLED		13	long
+TA_EB_POLL_INTERVAL		14	long
+TA_EB_COMP_SUB			15	short
+TA_EB_DB_SEQNO			16	long
+$/*Fields used in events posted by the JavaServer that are not part of any mib class.*/
+TA_EJB_NAME                     17      string
+TA_EJB_METHOD_NAME              18      string
+
+$
+$
+$#endif
+$#endif

@@ -1,0 +1,1060 @@
+$/*	Copyright (c) 1994 Novell
+$	All rights reserved
+$
+$	THIS IS UNPUBLISHED PROPRIETARY
+$	SOURCE CODE OF NOVELL
+$	The copyright notice above does not
+$	evidence any actual or intended
+$	publication of such source code.
+$
+$#ident	"@(#) tuxedo/include/tpadm	$Revision: 1.22 $"
+$*/
+$/*
+$	Warning: This file should not be changed in any
+$	way, doing so will destroy the compatibility with TUXEDO programs
+$	and libraries.
+$*/
+$#ifndef _TPADM_H
+$#define _TPADM_H
+$#ifndef NOWHAT
+$static	char h_tpadm[] = "@(#) tuxedo/include/tpadm	$Revision: 1.22 $";
+$#endif
+$#ifndef TMENV_H
+$#include <tmenv.h>
+$#endif
+$#ifndef ATMI_H
+$#include <atmi.h>
+$#endif
+$
+$#include <fml32.h>
+$
+$/*	User level interface function prototypes */
+$
+$#if defined(__cplusplus)
+$extern "C" {
+$#endif
+$
+$extern int	tpadmcall _((FBFR32 *, FBFR32 **, long));
+$
+$#if defined(__cplusplus)
+$}
+$#endif
+$
+$/*	ADMIN FIELD ENTRIES */
+$
+$/*
+$ * Flags values stored in TA_FLAGS, bit-wise flag map.
+$ *
+$ * Flag names beginning with MIB_ are generic to all component MIBs and
+$ * should not be reused or overlapped.  These values should also not be
+$ * changed as changes will affect release interoperability.
+$ *
+$ * Flag names beginning with other values (e.g., TMIB_ or QMIB_ are
+$ * specific to particular component MIBs and may be overlapped to conserve
+$ * the "name" space of the TA_FLAGS values.  Be sure when overlapping and
+$ * defining component MIB flag values to avoid overlapping with MIB_ values.
+$ */
+$#define MIB_PREIMAGE	0x00000001
+$#define MIB_LOCAL	0x00010000
+$#define MIB_SELF	0x00100000
+$
+$/*#define TMIB_RSRVD1	0x00010000*/
+$#define TMIB_NOTIFY	0x00020000
+$#define TMIB_ADMONLY	0x00040000
+$#define TMIB_CONFIG	0x00080000
+$/*#define TMIB_RSRVD2	0x00100000*/
+$#define TMIB_APPONLY	0x00200000
+$#define TMIB_GLOBAL	0x00400000
+$
+$/*#define QMIB_RSRVD1		0x00010000*/
+$#define QMIB_FORCECLOSE	0x00020000
+$#define QMIB_FORCEPURGE	0x00040000
+$#define QMIB_FORCEDELETE	0x00080000
+$/*#define QMIB_RSRVD2		0x00100000*/
+$
+$#define MIB_ALLFLAGS	(MIB_PREIMAGE|MIB_LOCAL|MIB_SELF|TMIB_NOTIFY|\
+$			 TMIB_ADMONLY|TMIB_CONFIG|TMIB_APPONLY|TMIB_GLOBAL|\
+$			 QMIB_FORCECLOSE|QMIB_FORCEPURGE|QMIB_FORCEDELETE)\
+$
+$/* TA_ATTFLAGS values, bit-wise flag map */
+$#define MIBATT_KEYFIELD	0x00000001
+$#define MIBATT_LOCAL		0x00000002
+$#define MIBATT_REGEXKEY	0x00000004
+$#define MIBATT_REQUIRED	0x00000008
+$#define MIBATT_SETKEY		0x00000010
+$#define MIBATT_NEWONLY		0x00000020
+$#define MIBATT_RUNTIME		0x00000040
+$
+$
+$/* Error Return codes set in TA_ERROR */
+$
+$#define TAEAPP		-1	/* App component error during MIB processing */
+$#define TAECONFIG	-2	/* Operating system error */
+$#define TAEINVAL	-3	/* invalid argument */
+$#define TAEOS		-4	/* Operating system error */
+$#define TAEPERM	-5	/* permission error */
+$#define TAEPREIMAGE	-6	/* preimage does not match current image */
+$#define TAEPROTO	-7	/* MIB specific protocol error */
+$#define TAEREQUIRED	-8	/* field value required but not present */
+$#define TAESUPPORT	-9	/* Documented but unsupported feature */
+$#define TAESYSTEM	-10	/* Internal System/T error */
+$#define TAEUNIQ	-11	/* SET did not specify unique class instance */
+$
+$/* Non-Error Return codes set in TA_ERROR */
+$
+$#define TAOK		0	/* suceeded */
+$#define TAUPDATED	1	/* suceeded and updated a record */
+$#define TAPARTIAL	2	/* suceeded at master; failed elsewhere */
+$
+#
+# The following fields are generic fields specified on the MIB(5) manual page
+# Note, each field id comment starts with I, O or IO indicating if the field
+# may be an input value, output value or either.
+#
+# Note that fields 7200-7299 are reserved for use by TUXEDO OEMs.
+#
+#NAME		ID	TYPE	COMMENT
+#----		--	----	-------
+*base 6000
+TA_ATTRIBUTE	     0	long	IO Field identifier of class attribute
+TA_BADFLD	     1	long	O  Field identifier of field in error
+TA_CLASS	     2	string	IO class name, see MIB(5) and TM_MIB(5)
+TA_CLASSNAME	     3	string	IO class name, see MIB(5) and TM_MIB(5)
+TA_CURSOR	     4	string	IO Used on GETNEXT operations
+TA_CURSORHOLD	     5	long	I  cursor timeout value
+TA_ERROR	     6	long	O  Return code (see above)
+TA_FILTER	     7	long	I  Input filter field identifiers (up to 32)
+TA_FLAGS	     8	long	I  flags on request (see above)
+TA_MIBTIMEOUT	     9	long	I  processing timeout value
+TA_MORE		    10	long	O  Number of matching entries left to GET
+TA_OCCURS	    11	long	IO number of occurrences requested or returned
+TA_OPERATION	    12	string	I  operation, one of GET, SET or GETNEXT
+TA_PERM		    13	long	IO Permissions of a class attribute
+TA_STATE	    14	string	IO State of class instance
+TA_STATUS	    15	string	O  Returned textual description of situation
+$
+$/*
+$	The following fields are TM_MIB(5) specific fields.  Consult TM_MIB(5)
+$	for details on each field and its use.
+$*/
+$
+#NAME		    ID	TYPE	COMMENT
+#----		    --	----	-------
+*base 6200
+$#ifndef REDUCE_CPP
+$/*
+$	The field numbers below should always begin at 0 and increase.
+$	Field numbers cannot be reused or changed from release to release or
+$	interoperability will be broken.  Fields 0-244 (base 6200) defined in
+$	release 5.0, fields defined in release 6.0 begin at field 245 and
+$	increase from there.
+$
+$	Note that fields 7200-7299 are reserved for use by TUXEDO OEMs.
+$*/
+TA_ACCWORD	     0	long
+TA_APPDIR	     1	string
+TA_AUTHSVC	     2	string
+TA_AUTOTRAN	     3	string
+TA_BASESRVID	     4	long
+TA_BBLQUERY	     5	long
+TA_BLOCKTIME	     6	long
+TA_BRIDGE	     7	string
+TA_BUFTYPE	     8	string
+TA_CFGDEVICE	     9	string
+TA_CFGOFFSET	    10	long
+TA_CLIENTID	    11	string
+TA_CLOPT	    12	string
+TA_CLOSEINFO	    13	string
+TA_CLTLMID	    14	string
+TA_CLTNAME	    15	string
+TA_CLTPID	    16	long
+TA_CLTREPLY	    17	string
+TA_CMPLIMIT	    18	string
+TA_CMTRET	    19	string
+TA_CONNOGRPNO	    20	long
+TA_CONNOLMID	    21	string
+TA_CONNOPID	    22	long
+TA_CONNOREGIDX	    23	long
+TA_CONNOSNDCNT	    24	long
+TA_CONNOSRVID	    25	long
+TA_CONNSGRPNO	    26	long
+TA_CONNSLMID	    27	string
+TA_CONNSPID	    28	long
+TA_CONNSSNDCNT	    29	long
+TA_CONNSSRVID	    30	long
+TA_CONTIME	    31	long
+TA_CONV		    32	string
+TA_COORDLMID	    33	string
+TA_CURACCESSERS	    34	long
+TA_CURCLIENTS	    35	long
+TA_CURCONV	    36	long
+TA_CURDRT	    37	long
+TA_CURGROUPS	    38	long
+TA_CURGTT	    39	long
+TA_CURLMID	    40	string
+TA_CURMACHINES	    41	long
+TA_CURQUEUES	    42	long
+TA_CURREQ	    43	long
+TA_CURRFT	    44	long
+TA_CURRLOAD	    45	long
+TA_CURRSERVICE	    46	string
+TA_CURRTDATA	    47	long
+TA_CURSERVERS	    48	long
+TA_CURSERVICES	    49	long
+TA_CURSTYPE	    50	long
+TA_CURTIME	    51	long
+TA_CURTYPE	    52	long
+TA_CURWSCLIENTS	    53	long
+TA_DBBLWAIT	    54	long
+TA_DEBUG	    55	string
+TA_DEVICE	    56	string
+TA_DEVINDEX	    57	long
+TA_DEVOFFSET	    58	long
+TA_DEVSIZE	    59	long
+TA_DOMAINID	    60	string
+TA_ENDTIME	    61	long
+TA_ENVFILE	    62	string
+TA_FIELD	    63	string
+TA_FLOWCNT	    64	long
+TA_FREEMAPAVAIL	    65	long
+TA_FREEMAPCOUNT	    66	long
+TA_FREEMAPINDEX	    67	long
+TA_FREEMAPOFFSET    68	long
+TA_FREEMAPSIZE	    69	long
+TA_GENERATION	    70	long
+TA_GID		    71	long
+TA_GRACE	    72	long
+TA_GRPCOUNT	    73	long
+TA_GRPINDEX	    74	long
+TA_GRPNO	    75	long
+TA_GSTATE	    76	string
+TA_GTRID	    77	string
+TA_HITICKET	    78	long
+TA_HWACCESSERS	    79	long
+TA_HWCLIENTS	    80	long
+TA_HWCONV	    81	long
+TA_HWDRT	    82	long
+TA_HWGROUPS	    83	long
+TA_HWGTT	    84	long
+TA_HWMACHINES	    85	long
+TA_HWQUEUES	    86	long
+TA_HWRFT	    87	long
+TA_HWRTDATA	    88	long
+TA_HWSERVERS	    89	long
+TA_HWSERVICES	    90	long
+TA_HWWSCLIENTS	    91	long
+TA_IPCKEY	    92	long
+TA_ITERATION	    93	long
+TA_LASTGRP	    94	long
+TA_LDBAL	    95	string
+TA_LICEXPIRE	    96	string
+TA_LICMAXUSERS	    97	long
+TA_LICSERIAL	    98	string
+TA_LOAD		    99	long
+TA_MASTER	   100	string
+TA_MAX		   101	long
+TA_MAXACCESSERS	   102	long
+TA_MAXBUFSTYPE	   103	long
+TA_MAXBUFTYPE	   104	long
+TA_MAXCONV	   105	long
+TA_MAXDRT	   106	long
+TA_MAXGEN	   107	long
+TA_MAXGROUPS	   108	long
+TA_MAXGTT	   109	long
+TA_MAXMACHINES	   110	long
+TA_MAXMTYPE	   111	long
+TA_MAXQUEUES	   112	long
+TA_MAXRFT	   113	long
+TA_MAXRTDATA	   114	long
+TA_MAXSERVERS	   115	long
+TA_MAXSERVICES	   116	long
+TA_MAXWSCLIENTS	   117	long
+TA_MIBMASK	   118	long
+TA_MIN		   119	long
+TA_MINOR	   120	long
+TA_MMDDYY	   121	long
+TA_MODEL	   122	string
+$#ifndef REDUCE_CPP_NOIPC
+TA_MSGID	   123	long
+TA_MSG_CBYTES	   124	long
+TA_MSG_CTIME	   125	long
+TA_MSG_LRPID	   126	long
+TA_MSG_LSPID	   127	long
+TA_MSG_QBYTES	   128	long
+TA_MSG_QNUM	   129	long
+TA_MSG_RTIME	   130	long
+TA_MSG_STIME	   131	long
+$#endif
+TA_NADDR	   132	string
+TA_NCOMPLETED	   133	long
+TA_NLSADDR	   134	string
+TA_NOTIFY	   135	string
+TA_NQUEUED	   136	long
+TA_NUMCONV	   137	long
+TA_NUMDEQUEUE	   138	long
+TA_NUMENQUEUE	   139	long
+TA_NUMPOST	   140	long
+TA_NUMREQ	   141	long
+$/* TA_NUMSEMWKUP was used previously by locking code - do no use offset 142 */
+TA_NUMSERVED	   143	long
+TA_NUMSUBSCRIBE	   144	long
+TA_NUMTRAN	   145	long
+TA_NUMTRANABT	   146	long
+TA_NUMTRANCMT	   147	long
+TA_NUMUNSOL	   148	long
+TA_OPENINFO	   149	string
+TA_OPTIONS	   150	string
+TA_PAGESIZE	   151	long
+TA_PID		   152	long
+TA_PMID		   153	string
+TA_PRIO		   154	long
+TA_RANGES	   155	carray
+TA_RCMD		   156	string
+TA_RCVDBYT	   157	long
+TA_RCVDNUM	   158	long
+TA_RELEASE	   159	long
+TA_REPLYQ	   160	string
+TA_RESTART	   161	string
+TA_ROLE		   162	string
+TA_ROUTINGNAME	   163	string
+TA_RPID		   164	long
+TA_RPPERM	   165	long
+TA_RQADDR	   166	string
+TA_RQID		   167	long
+TA_RQPERM	   168	long
+TA_SANITYSCAN	   169	long
+TA_SCANUNIT	   170	long
+TA_SECURITY	   171	string
+$#ifndef REDUCE_CPP_NOIPC
+TA_SEMID	   172	long
+TA_SEMTICKET	   173	long
+TA_SEM_OTIME	   174	long
+$#endif
+TA_SENTBYT	   175	long
+TA_SENTNUM	   176	long
+TA_SEQUENCE	   177	long
+TA_SERVERCNT	   178	long
+TA_SERVERNAME	   179	string
+TA_SERVICENAME	   180	string
+TA_SEVERITY	   181	string
+$#ifndef REDUCE_CPP_NOIPC
+TA_SHMID	   182	long
+TA_SHMKEY	   183	long
+TA_SHMSZ	   184	long
+TA_SHM_ATIME	   185	long
+TA_SHM_CTIME	   186	long
+TA_SHM_DTIME	   187	long
+TA_SHM_NATTCH	   188	long
+$#endif
+TA_SOURCE	   189	string
+TA_SPINCOUNT	   190	long
+TA_SUSPTIME	   191	long
+TA_SVCRNAM	   192	string
+TA_SVCTIMEOUT	   193	long
+TA_SWRELEASE	   194	string
+TA_SYSTEM_ACCESS   195	string
+TA_TIMELEFT	   196	long
+TA_TIMEOUT	   197	long
+TA_TIMERESTART	   198	long
+TA_TIMESTART	   199	long
+TA_TLOGCOUNT	   200	long
+TA_TLOGDATA	   201	string
+TA_TLOGDEVICE	   202	string
+TA_TLOGINDEX	   203	long
+TA_TLOGNAME	   204	string
+TA_TLOGOFFSET	   205	long
+TA_TLOGSIZE	   206	long
+TA_TMDEBUG	   207	string
+TA_TMNETLOAD	   208	long
+TA_TMSCOUNT	   209	long
+TA_TMSNAME	   210	string
+TA_TOTNP	   211	long
+TA_TOTNQUEUED	   212	long
+TA_TOTNV	   213	long
+TA_TOTREQC	   214	long
+TA_TOTWANTERS	   215	long
+TA_TOTWKQUEUED	   216	long
+TA_TOTWKUPRCV	   217	long
+TA_TOTWKUPSENT	   218	long
+TA_TOTWORKL	   219	long
+TA_TPTRANID	   220	string
+TA_TRANLEV	   221	long
+TA_TRANTIME	   222	long
+TA_TUXCONFIG	   223	string
+TA_TUXDIR	   224	string
+TA_TUXOFFSET	   225	long
+TA_TYPE		   226	string
+TA_UID		   227	long
+TA_ULOGCAT	   228	string
+TA_ULOGLINE	   229	long
+TA_ULOGMSG	   230	string
+TA_ULOGMSGNUM	   231	long
+TA_ULOGPFX	   232	string
+TA_ULOGPROCNM	   233	string
+TA_ULOGTIME	   234	long
+TA_USIGNAL	   235	string
+TA_USRNAME	   236	string
+TA_VALIDATION	   237	string
+TA_WAITS	   238	string
+TA_WKCOMPLETED	   239	long
+TA_WKINITIATED	   240	long
+TA_WKQUEUED	   241	long
+TA_WSC		   242	string
+TA_WSH		   243	string
+TA_XID		   244	string
+$/*
+$	The field numbers below have been added to the system with release 6.0.
+$	They begin at 245 (base 6200) and increase from there.
+$	Field numbers cannot be reused or changed from release to release or
+$	interoperability will be broken.  Fields 0-244 (base 6200) defined in
+$	release 5.0, fields defined in release 6.0 begin at field 245 and
+$	increase from there.
+$
+$	Note that fields 7200-7299 are reserved for use buy TUXEDO OEMs.
+$*/
+*base 6445
+TA_ACLCACHEACCESS    0	long
+TA_ACLCACHEHITS	     1	long
+TA_ACLFAIL	     2	long
+TA_ACLGROUPIDS	     3	string
+TA_ACLNAME	     4	string
+TA_ACLTYPE	     5	string
+TA_ACTIVE	     6	string
+TA_ATTFLAGS	     7	long
+TA_CURHANDLERS	     8	long
+TA_CURWORK	     9	long
+TA_DEFAULT	    10	string
+TA_FACTPERM	    11	long
+TA_GETSTATES	    12	string
+TA_GROUPID	    13	long
+TA_GROUPNAME	    14	string
+TA_HWACLCACHE	    15	long
+TA_HWHANDLERS	    16	long
+TA_IDLETIME	    17	long
+TA_INASTATES	    18	string
+TA_MAXACLCACHE	    19	long
+TA_MAXACLGROUPS	    20	long
+TA_MAXHANDLERS	    21	long
+TA_MAXIDLETIME	    22	long
+TA_MAXINITTIME	    23	long
+TA_MAXPERM	    24	long
+TA_MINHANDLERS	    25	long
+TA_MULTIPLEX	    26	long
+TA_NUMBLOCKQ	    27	long
+TA_PREFERENCES	    28	string
+TA_PRINCLTNAME	    29	string
+TA_PRINGRP	    30	long
+TA_PRINID	    31	long
+TA_PRINNAME	    32	string
+TA_PRINPASSWD	    33	string
+TA_SETSTATES	    34	string
+TA_SUSPENDED	    35	string
+TA_SVCTYPE	    36	string
+TA_TOTACTTIME	    37	long
+TA_TOTIDLTIME	    38	long
+TA_VIEWREFRESH	    39	string
+TA_WSHCLIENTID	    40	string
+TA_WSHNAME	    41	string
+TA_WSPROTO	    42	long
+$/*
+$	The fields below have been added to TMIB beginning release 6.3
+$*/
+TA_COORDGRPNO	43	long
+TA_COORDSRVGRP	44	string
+TA_MINWSHPORT	45	long
+TA_MAXWSHPORT	46	long
+TA_MINENCRYPTBITS	47	string
+TA_MAXENCRYPTBITS	48	string
+TA_CURENCRYPTBITS	49	string
+TA_EXT_NADDR	50	string
+TA_COMPONENTS	51	string
+TA_OLDENCRYPT	52	string
+TA_OLDCMPLIMIT	53	string
+$/*
+$	The fields below have been added to TMIB beginning release 6.4
+$*/
+TA_MAXPENDINGBYTES	54	long
+TA_NETGROUP	55	string
+TA_NETGRPNO	56	long
+TA_NETPRIO	57	long
+TA_MAXNETGROUPS	58	long
+TA_KEEPALIVE	59	string
+TA_NETTIMEOUT	60	long
+$/*
+$	The fields below have been added to TMIB beginning release 6.5
+$*/
+TA_CURINTERFACE	61	string
+TA_CUROBJECTS	62	long
+TA_CURTRANSACTIONS 63	long
+TA_INTERFACENAME 64	string
+TA_MAXINTERFACES 65	long
+TA_MAXOBJECTS	66	long
+TA_NUMSERVERS	67	long
+TA_TPPOLICY	68	string
+TA_TXPOLICY	69	string
+TA_HWOBJECTS	70	long
+TA_FBROUTINGNAME 71	string
+TA_CURINTERFACES 72	long
+TA_HWINTERFACES 73	long
+TA_FACTORYID	74	string
+TA_FIELDTYPE	75	string
+$/*
+$	The fields below have been added to TMIB beginning release 7.1
+$*/
+TA_SIGNATURE_AHEAD	76	long
+TA_SIGNATURE_BEHIND	77	long
+TA_SIGNATURE_REQUIRED	78	string
+TA_ENCRYPTION_REQUIRED	79	string
+TA_THREADID	80	long
+TA_CONTEXTID	81	long
+TA_MAXDISPATCHTHREADS	82	long
+TA_MINDISPATCHTHREADS	83	long
+TA_THREADSTACKSIZE	84	long
+TA_CURDISPATCHTHREADS	85	long
+TA_HWDISPATCHTHREADS	86	long
+TA_NUMDISPATCHTHREADS	87	long
+TA_SEC_PRINCIPAL_NAME	88	string
+TA_SEC_PRINCIPAL_LOCATION	89	string
+TA_SEC_PRINCIPAL_PASSVAR	90	string
+TA_SEC_PRINCIPAL_PASSWORD	91	string
+TA_FADDR	92	string
+TA_FRANGE	93	long
+$/*
+$	The fields below have been added to TMIB beginning release 7.2
+$*/
+TA_SICACHEENTRIESMAX	94	string
+TA_MAXQUEUELEN       95 long
+
+$/*
+$	The last entry in this section must be 154 ( 6445 + 155 = 6600 )
+$*/
+$
+$#ifndef REDUCE_CPP_NOQMIB
+$/*
+$	The fields below belong to the /Q MIB.
+$*/
+*base 6600
+TA_APPQMSGID	     0	string
+TA_APPQNAME	     1	string
+TA_APPQORDER	     2	string
+TA_APPQSPACENAME     3	string
+TA_APPQSPACERM	     4	string
+TA_BLOCKING	     5	long
+TA_CMD		     6	string
+TA_CMDHW	     7	string
+TA_CMDLW	     8	string
+TA_CORRID	     9	string
+TA_CURBLOCKS	    10	long
+TA_CUREXTENT	    11	long
+TA_CURMSG	    12	long
+TA_CURPROC	    13	long
+TA_CURRETRIES	    14	long
+TA_CURTRANS	    15	long
+TA_ERRORQNAME	    16	string
+TA_FORCEINIT	    17	string
+TA_HIGHPRIORITY	    18	long
+TA_HWMSG	    19	long
+TA_HWPROC	    20	long
+TA_HWTRANS	    21	long
+TA_LOWPRIORITY	    22	long
+TA_LSTATE	    23	string
+TA_MAXMSG	    24	long
+TA_MAXPAGES	    25	long
+TA_MAXPROC	    26	long
+TA_MAXRETRIES	    27	long
+TA_MAXTRANS	    28	long
+TA_MSGENDTIME	    29	string
+TA_MSGSIZE	    30	long
+TA_MSGSTARTTIME	    31	string
+TA_NEWAPPQNAME	    32	string
+TA_OUTOFORDER	    33	string
+TA_PERCENTINIT	    34	long
+TA_PRIORITY	    35	long
+TA_QMCONFIG	    36	string
+TA_RETRYDELAY	    37	long
+TA_STARTTIME	    38	string
+TA_TIME		    39	string
+$/*
+$	The fields below have been added to APPMIB beginning release 7.1
+$*/
+TA_CONTEXT_ID		40	long
+$/*
+$	New APPQ fileds
+$*/
+TA_CMDNONPERSIST	41	string
+TA_CMDNONPERSISTHW	42	string
+TA_CMDNONPERSISTLW	43	string
+TA_CURNONPERSISTBYTES	44	long
+TA_CURNONPERSISTMSG	45	long
+TA_DEFDELIVERYPOLICY	46	string
+TA_DEFEXPIRATIONTIME 	47 	string
+$/*
+$	New APPQMSG fileds
+$*/
+TA_EXPIRETIME   	48      string
+TA_MSGEXPIREENDTIME	49	string
+TA_MSGEXPIRESTARTTIME	50	string
+TA_PERSISTENCE		51  	string
+TA_REPLYPERSISTENCE	52  	string
+$/*
+$	New APPQSPACE fileds
+$*/
+TA_CURACTIONS 		53	long
+TA_CURCURSORS 		54	long
+TA_CURHANDLES 		55	long
+TA_CURMEMFILTERS 	56	long
+TA_CURMEMNONPERSIST 	57	long
+TA_CURMEMOVERFLOW 	58	long
+TA_CUROWNERS 		59	long
+TA_CURTMPQUEUES		60	long
+TA_HWACTIONS 		61	long
+TA_HWCURSORS 		62	long
+TA_HWHANDLES 		63	long
+TA_HWMEMFILTERS 	64	long
+TA_HWMEMNONPERSIST 	65	long
+TA_HWMEMOVERFLOW 	66	long
+TA_HWOWNERS 		67	long
+TA_HWTMPQUEUES		68	long
+TA_MAXACTIONS 		69	long
+TA_MAXCURSORS 		70	long
+TA_MAXHANDLES		71	long
+TA_MAXOWNERS 		72	long
+TA_MAXTMPQUEUES		73	long
+TA_MEMFILTERS 		74	long
+TA_MEMNONPERSIST    	75  	string 
+TA_MEMOVERFLOW 		76	long
+TA_MEMSYSTEMRESERVED	77  	long
+TA_MEMTOTALALLOCATED	78  	long
+$#endif
+$#endif
+*base 6700
+$/*
+$	The field numbers below should always begin at 500 and increase.
+$	Field numbers cannot be reused or changed from release to release or
+$	interoperability will be broken.
+$
+$	Note that fields 7200-7299 are reserved for use buy TUXEDO OEMs.
+$*/
+TA_LMID		     0	string
+TA_PASSWORD	     1	string
+TA_SRVGRP	     2	string
+TA_SRVID	     3	long
+TA_TMTRACE	     4	string
+$
+$
+$/* 
+$	The following fields have been defined for use by the Domain MIB.
+$	The field numbers reserved for Domain MIB are 6750 - 6950.
+$*/
+$
+$#ifndef REDUCE_CPP
+*base 6750
+$
+$ /* DM_SNADOM    */
+TA_DMSNADOM		10	string	-
+TA_DMLUNAME		11	string	-
+TA_DMMODENAME		12	string	-
+TA_DMNETID		13	string	-
+TA_DMSECTYPE		14	string	-
+TA_DMSYMDESTNAME	15	string	-
+TA_DMMAXSNASESS		16	short	-
+TA_DMLCONV		17	string	-
+$
+$ /* DM_TDOMAIN */
+TA_DMTDOM	25	string	-	domain name in DM_TDOMAINS
+TA_DMNWADDR	26	string	-	Network address in DM_TDOMAINS
+TA_NWADDRLEN	27	short	-	Network address length in DM_TDOMAINS
+TA_DMNWDEVICE	28	string	-	Network device in DM_TDOMAINS
+TA_DMNWIDLETIME	29	long	-	Network idletime in DM_TDOMAINS
+$
+$ /* DM_OSITP */
+TA_DMOSITP	30 	string 	-	domain_name in DM_OSITP
+TA_DMAPT	31	string	-	Application process title in DM_OSITP
+TA_APTLEN	32	short	-
+TA_DMAEQ	33	string	-	App. entity qualifier in DM_OSITP
+TA_AEQLEN	34	short	-
+TA_DMAET	35	string	-	App. entity title in DM_OSITP
+TA_DMACN	36	string	-	App. context name in DM_OSITP
+TA_ACN2		37	short	-	App. context name in DM_OSITP
+TA_DMAPID	38	short	-	App. process invocation Id in DM_OSITP
+TA_DMAEID	39	short	-	App. entity invocation Id in DM_OSITP
+TA_DMPROFILE	40	string	-	profile in DM_OSITP
+TA_PROFILE2	41	short	-	profile in DM_OSITP
+TA_DMURCH	42	string	-	User Recovery Context Handle
+$
+$ /* DM_LOCAL_DOMAIN */
+TA_LDOMAIN		43	string	-
+TA_DMSRVGROUP	44	string 	-
+TA_DMTYPE		45	string 	-
+TA_DOMAINAME	46	string 	-
+TA_DMTLOGDEV	47	string 	-
+TA_DMAUDITLOG	48	string 	-
+TA_DMBLOCKTIME	49	short	-
+TA_DMTLOGNAME	50	string 	-
+TA_DMTLOGSIZE	51	long	-
+TA_MAXDATALEN	52	long	-	Unused in rel.6.0
+TA_DMMAXRDOM	53	long	-
+TA_DMMAXRDTRAN	54	short 	-
+TA_DMMAXTRAN	55	short	-
+TA_MAXSENDLEN	56	long	-	Unused in 6.0
+TA_DMSECURITY	57	string	-
+TA_SECURITY2	58	short	-	Unused between DMADM client and DMADM
+TA_DMTUXCONFIG	59	string	- 	Unused
+TA_DMTUXOFFSET	60	long	-	Unused
+TA_BLOB_SHM_SIZE 61	long	- 	Unused.
+$
+$ /* DM_REMOTE_DOMAIN */
+TA_RDOMAIN		62	string	-
+TA_LOOPBACK	63	short	- Unused
+$
+$ /* DM_ACCESS_CONTROL */
+TA_DMACLNAME	64	string	-
+TA_NRDOM	65	short	-
+TA_DMRDOMLIST	66	string	-
+$
+$ /* DM_LOCAL_SERVICES */
+TA_DMBUFTYPE	67	string	-
+TA_DMBUFSTYPE	68	string	-
+TA_DMINBUFTYPE	69	string	-
+TA_DMOBUFTYPE	70	string	-
+TA_DMOBUFSTYPE	71	string	-
+TA_DMOUTBUFTYPE	72	string	-
+TA_DMREMOTENAME	73	string	-
+TA_DMSERVICENAME	74	string	-
+$
+$ /* DM_ROUTING */
+TA_DMROUTINGNAME	75	string	-
+TA_DMFIELD	76	string	-
+TA_DMRANGES	77	string	-
+$
+$ /* DM_REMOTE_SERVICES */
+TA_DMAUTOTRAN	78	string	-
+TA_AUTOTRAN2	79	short	-
+TA_DMCONV		80	string	-
+TA_CONV2	81	short	-
+TA_DMLOAD		82	short	-
+TA_DMPRIO		83	short	-
+TA_DMTRANTIME	84	long	-
+
+TA_DUMMYSRVGRP	85	string	-	
+TA_DUMMYSRVID	86	short	-	
+TA_DUMMYSTATE	87	short	-	
+TA_DUMMYACTIVITY	88	short	-
+
+TA_DUMMYALLSTATS	89	short	-	for printstats dmadmin command
+TA_DUMMYDOMSTATS	90	short	-	for printdomain dmadmin command
+TA_DUMMYOPTION	91	short	-	TA_ALLSTATS or TA_DOMSTATS
+TA_ON		92	short	-	Turn on AUDITING or STATS
+TA_OFF		93	short	-	Turn off AUDITING or STATS 
+TA_RESET	94	short	-	Reset AUDIT or STATISTICS
+TA_DUMMYTOGGLE	95	short	-	toggle AUDIT or STATISTICS
+TA_DMSTATISTICS	96	short	-	TA_ON, TA_OFF, TA_RESET, TA_TOGGLE
+TA_DMAUDIT	97	short	-	TA_ON, TA_OFF, TA_TOGGLE
+
+TA_TRAN_STATE	98	long	-	transaction state	
+$/*TA_DUMMYMTYPE	100	string	-	Machine Type in LDOM/RDOM */
+
+*base 6850
+TA_DMNUMREQLSVC	 	0	long	-	requests to local services
+TA_DMNUMREQRSVC 	1	long	-	requests to remote services
+TA_DMNUMREPLSVC		2	long	-	replies to local services
+TA_DMNUMREPRSVC		3	long	-	replies to remote services
+TA_CURACTRQ		4	long	-	outstanding service requests
+TA_DMNUMREQCOMP		5	long	-	requests completed
+TA_DMNUMREQFAIL		6	long	-	requests failed
+TA_DMNUMCONVACT		7	long	-	active conversations
+TA_DMNUMCONVLOC		8	long	-	requests to local conv services
+TA_DMNUMCONVLSND	9	long	-	sends to local conv svcs
+TA_DMNUMCONVREM		10	long	-	requests to remote conv svcs
+TA_DMNUMCONVRSND	11	long	-	sends to remote conv svcs
+TA_CURACTEV		12	long	-	active events
+TA_CURSUSPTEV		13	long	-	suspended /T events
+TA_CURSUSPNEV		14	long	-	suspended network events
+TA_DMNUMTXBEGUN		15	long	-	transactions started
+TA_DMNUMTXCOMMIT	16	long	-	transactions committed
+TA_DMNUMTXHCOMMIT	17	long	-	transactions heuris. committed
+TA_DMNUMTXHRLBCK	18	long	-	transactions heuris. roll back
+TA_DMNUMTXRLBCK		19	long	-	transactions rolled back
+TA_DMSTATRESETIME	20	long	-	Time stats were reset
+TA_SHM_CONTENTIONS	21	long	-	Contentions for shared memory.
+TA_LOG_CONTENTIONS	22	long	-	Contentions for log records.
+
+TA_PASSWD		25	string	-
+TA_ENCPASSWD		26	string	-
+TA_DMLPWD		27	string	-
+TA_DMRPWD		28	string	-
+TA_ENC2_LPWD		29	string	-
+TA_ENC2_RPWD		30	string	-
+TA_REENCRYPT_PWD	31	short	-
+
+TA_DMGWNUM		32	long	-
+TA_DMRDOMNUM		33	long 	-
+TA_DMTXPARENT		34	string	-
+TA_DMTXID		35	string	-
+TA_DMPRINNAME		43	string	-
+TA_DMRPRINNAME		44	string	-
+TA_DMRPRINPASSWD	45	string	-
+TA_DMDIRECTION		46	string	-
+TA_DMRDOMSEC		47	string	-
+TA_DMRDOMUSR		48	string	-
+
+TA_DMCMPLIMIT		50	long	-	compression in DM_TDOMAIN
+TA_DMMINENCRYPTBITS	51	string	-	min encrypt bits in DM_TDOMAIN
+TA_DMMAXENCRYPTBITS	52	string	-	max encrypt bits in DM_TDOMAIN
+
+$/* SNA2 Begin */
+TA_DMSNALINK		53      string  -       name of link section
+TA_DMLSYSID		54      string  -
+TA_DMRSYSID		55      string  -
+TA_DMMINWIN		56      short   -
+TA_DMMAXSYNCLVL		57      short   -
+TA_DMSNASTACK		58      string  -       name of stack section
+TA_DMSNACRM		59      string  -       name of crm section
+TA_DMSTACKTYPE		60      string  -
+TA_DMTPNAME		61      string  -
+TA_DMSTACKPARMS		62      string  -
+TA_DMAPI		63      string  -
+TA_DMFUNCTION		64      string  -
+TA_DMCODEPAGE		65      string  -
+TA_DMSTARTTYPE		66      string  -        
+$/* SNA2 End */
+
+TA_DMCONNECTION_POLICY    67     string  -
+TA_DMRETRY_INTERVAL       68     long    -
+TA_DMMAXRETRY             69     long    -
+
+$/*
+$ * adds for OSITP V4.0 and TUX V7.2 
+$ */
+$/* TA_DMACCESSPOINT string */
+$/* TA_STATE string */
+$/* TA_DMAET string */
+$/* TA_DMNWADDR string */
+TA_DMTSEL           70	string -
+TA_DMTAILORPATH     71	string -
+TA_DMPSEL           72	string -
+TA_DMSSEL           73	string -
+TA_DMEXTENSIONS		74	string -
+$/* TA_DMMINENCRIPTBITS string */
+$/* TA_DMMAXENCRIPTBITS string */
+TA_DMMULTIPLEXING   75	short -
+TA_DMDNSRESOLUTION  76	string -
+TA_DMOPTIONS		77  string -
+$/* TA_DMXATMIENCODING string */
+$/* Local Services adds for OSITP V4.0 */
+TA_DMCOUPLING       78	string -
+TA_DMINRECTYPE      79	string -
+TA_DMINRECSTYPE     80	string -
+TA_DMOUTRECTYPE     81	string -
+TA_DMOUTRECSTYPE    82	string -
+$/* Remote Services adds for OSITP V4.0 */
+TA_DMAUTOPREPARE    83	string -
+TA_DMTPSUTTYPE      84	string -
+TA_DMREMTPSUT       85	string -
+$/* OSITP V4.0 End */
+
+$/*
+$ * New Domains MIB class attributes
+$ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ * The range 30001501 - 30001700 is reserved for DMIB fields.
+$ */
+*base 30001500
+TA_DMACCESSPOINT           1     string  -
+TA_DMACCESSPOINTID         2     string  -
+TA_DMLACCESSPOINT          3     string  -
+TA_DMRACCESSPOINT          4     string  -
+TA_DMRESOURCENAME          5     string  -
+TA_DMRESOURCETYPE          6     string  -
+TA_DMTE_PRODUCT            7     string  -
+TA_DMTE_FUNCTION           8     string  -
+TA_DMTE_TARGET             9     string  -
+TA_DMTE_QUALIFIER         10     long    -
+TA_DMTE_RTQGROUP          11     string  -
+TA_DMTE_RTQNAME           12     string  -
+TA_DMTE_TP_SYSTEM         13     string  -
+TA_DMMAXRAPTRAN           14     short   -
+TA_DMMACHINETYPE          15     string  -
+TA_DMMAXLISTENINGEP       16     short   -
+TA_DMVERSION              17     string  -
+TA_DMEVNUMACT             18     long    -
+TA_DMEVNUMSUSPN           19     long    -
+TA_DMEVNUMSUSPT           20     long    -
+TA_DMLCONVNUMACT          21     long    -
+TA_DMLCONVNUMRCV          22     long    -
+TA_DMLCONVNUMSND          23     long    -
+TA_DMLCONVTOT             24     long    -
+TA_DMLCONVTOTFAIL         25     long    -
+TA_DMLCONVTOTRCV          26     long    -
+TA_DMLCONVTOTSND          27     long    -
+TA_DMLSVCNUMACT           28     long    -
+TA_DMLSVCTOT              29     long    -
+TA_DMLSVCTOTFAIL          30     long    -
+TA_DMLSVCTOTRPLY          31     long    -
+TA_DMLOGCONTENTIONS       32     long    -
+TA_DMRCONVNUMACT          33     long    -
+TA_DMRCONVNUMRCV          34     long    -
+TA_DMRCONVNUMSND          35     long    -
+TA_DMRCONVTOT             36     long    -
+TA_DMRCONVTOTFAIL         37     long    -
+TA_DMRCONVTOTRCV          38     long    -
+TA_DMRCONVTOTSND          39     long    -
+TA_DMRSVCNUMACT           40     long    -
+TA_DMRSVCTOT              41     long    -
+TA_DMRSVCTOTFAIL          42     long    -
+TA_DMRSVCTOTRPLY          43     long    -
+TA_DMSHMCONTENTIONS       44     long    -
+TA_DMSTATRESETTIME        45     long    -  Time stats were reset
+TA_DMTXNUMACT             46     long    -
+TA_DMTXTOTCOMMIT          47     long    -
+TA_DMTXTOTHCOMMIT         48     long    -
+TA_DMTXTOTHRLBCK          49     long    -
+TA_DMTXTOTRLBCK           50     long    -
+TA_DMFAILOVERSEQ          51     short   -
+TA_DMTE_PWD               52     string  -
+TA_DMBLOB_SHM_SIZE        53     long    -
+TA_DMTPTRANID             54     string  -
+TA_DMTXACCESSPOINT        55     string  -
+TA_DMTXNETTRANID          56     string  -
+TA_DMBRANCHCOUNT          57     long    -
+TA_DMBRANCHINDEX          58     long    -
+TA_DMBRANCHNO             59     long    -
+TA_DMBRANCHSTATE          60     string  -
+TA_DMNETTRANID            61     string  -
+TA_DMXATMIENCODING        62     string  -
+TA_DMCURENCRYPTBITS       63     string  -
+TA_DMFIELDTYPE            64     string  -
+TA_DMACLPOLICY            65     string  -
+TA_DMCONNPRINCIPALNAME 	  66     string	 -
+TA_DMLOCALPRINCIPALNAME	  67     string	 -
+TA_DMRACCESSPOINTLIST	  68     string  -
+TA_DMPRIORITY_TYPE	  69     string  -
+TA_DMINPRIORITY		  70     short   -
+TA_DMCREDENTIALPOLICY     71     string  -
+TA_DMTCPKEEPALIVE         72     string  - TDOMAIN TCP keepalive
+TA_DMKEEPALIVE            73     long    - TDOMAIN App Keepalive interval
+TA_DMKEEPALIVEWAIT        74     long    - TDOMAIN App Keepalive window
+TA_ABORT_THRESHOLD        75     long    - TDOMAIN TCP ABORT THRESHOLD
+$/* End of new domains MIB class attributes */
+
+$/* end REDUCE_CPP */
+$#endif
+$/* 
+$	The following fields have been defined for use by the Event MIB.
+$	The field numbers reserved for Event MIB are 6950 - 7000.
+$*/
+$
+$#ifndef REDUCE_CPP
+*base 6950
+TA_EVENT_EXPR		1	string	-
+TA_EVENT_FILTER		2	string	-
+TA_EVENT_FILTER_BINARY	3	carray	-
+TA_QSPACE		4	string
+TA_QNAME		5	string
+TA_QCTL_QTIME_ABS	6	short
+TA_QCTL_QTIME_REL	7	short
+TA_QCTL_QTOP		8	short
+TA_QCTL_BEFOREMSGID	9	short
+TA_QCTL_DEQ_TIME	10	long
+TA_QCTL_PRIORITY	11	long
+TA_QCTL_MSGID		12	string
+TA_QCTL_CORRID		13	string
+TA_QCTL_REPLYQUEUE	14	string
+TA_QCTL_FAILUREQUEUE	15	string
+TA_EVENT_PERSIST	16	short
+TA_EVENT_TRAN		17	short
+TA_USERLOG		18	string
+TA_COMMAND		19	string
+TA_EVENT_SERVER		20	string
+TA_SUBSCRIPTION_VERSION	21	long
+TA_BLOB_TYPE	22	string
+TA_BLOB_VALUE	23	carray
+TA_EVENT_SET_HANDLE	24	short
+TA_EVENT_SET_BLOB	25	short
+TA_EVENT_UNIQUE	26	short
+#NAME		    ID	TYPE	COMMENT
+#----		    --	----	-------
+*base 7000
+#
+# The following field is present with this number for backwards compatibility
+# with older releases.
+#
+TA_SUBSCRIPTION_HANDLE		7	long
+$#endif
+
+$#ifndef REDUCE_CPP
+
+*base 30001001
+TA_PROGMODELS            1      string
+TA_SRVTYPE               2      string
+TA_JAVAHEAPSIZE          3      long
+TA_JAVAHEAPUSE           5      long
+TA_CLASSPATH             9      string
+TA_JAVAVERSION           10     string
+TA_JAVAVENDOR            11     string
+TA_INTERN_TACTSRVID      12     long
+TA_INTERN_TACTSRVGRP     13     string
+TA_INTERN_TACTGRPNO      14     long
+TA_INTERN_CURSOR         15     long
+TA_INTERN_FLDNAME        16     string
+TA_INTERN_FLDVALUE       17     string
+TA_INTERN_FLDTYPE        18     long
+TA_INTERN_APPKEY         19     long
+TA_MAXEJBCACHE           20     long
+TA_EJBCACHE_FLUSH        21     long
+TA_INTERN_ERROR          22     long
+TA_INTERN_DBBL		 23     long
+
+
+$/*T_MODULE fields */
+*base 30001041
+
+TA_MODULE                1      string
+TA_MODULEARGS            2      string
+TA_MODULETYPE            3      string
+TA_MODULEFILE            4      string
+TA_MODULECLASSPATH       5      string
+
+$/* T_CONNECTION_POOL fields */
+*base 30001061
+
+TA_DSNAME                1      string
+TA_DRIVER                2      string
+TA_URL                   3      string
+TA_DBNAME                4      string
+TA_DBUSER                5      string
+TA_DBPASSWORD   6      string
+TA_DBHOST                8      string
+TA_DBNETPROTOCOL         9      string
+TA_DBPORT                10      long
+TA_PROPS                 11      string
+TA_ENABLEXA              12     string
+TA_CREATEONSTARTUP       13     string
+TA_LOGINDELAY            14     long
+TA_INITCAPACITY          15     long
+TA_MAXCAPACITY           16     long
+TA_CAPACITYINCR          17     long
+TA_SHRINKPERIOD          18     long
+TA_TESTTABLE             19     string
+TA_REFRESH               20     long
+TA_TESTONRESERVE         21     string
+TA_TESTONRELEASE         22     string
+TA_WAITFORCONN           23     string
+TA_WAITTIMEOUT           24     long
+TA_CONNUSED              25     long
+TA_CONNAVAILABLE         26     long
+TA_HWMCONNUSED           27     long
+TA_HWMCONNCREATED        28     long
+TA_AWAITINGCONN          29     long
+TA_HWMFORWAIT            30     long
+TA_ALLOWSHRINKING        31     string
+TA_USERROLE              32     string
+
+$/* New fields in Release 8.1 */
+*base 30001701
+TA_MAXTRANTIME		  1	long
+TA_MAXSPDATA		  2	long
+TA_BRTHREADS		  3	string
+
+$#endif
+
+$#endif
